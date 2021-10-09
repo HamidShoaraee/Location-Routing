@@ -9,3 +9,5 @@ and operational decisions planning is routing heterogeneous fleet in two echelon
 for solving this problem we cast a *mathematical formulation* based on Integer Linear Programming as you can find this formulation on the **ILP.PDF** file. 
 
 For solving this ILP model we solve with help CPLEX optimizer and General Algebraic Modeling System (GMAS). You can find the Solver.~gm. 
+
+For solving this model with medium and large instances we used MATLAB and simulated annealing algorithm as a metaheuristic algorithm. 
