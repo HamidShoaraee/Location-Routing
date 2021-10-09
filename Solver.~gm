@@ -130,12 +130,12 @@ co_6  Demand constaraint
 co_7  One suplier at least 
 co_8  Cap constaraint
 co_9  Connection to first level 
-co_10 age az anbare asli dori shoro shod bayad be an bazgardim
-co_11 hazfe zir tour yani az abare asli shoro konim vali jaye dg tamom konim
-co_12 tamame bari ke ba h1 be s avarde shode bayad barabare tamame taghazai bashad ke be in anbar vasl shode
-co_13 majmoe bari ke be anbare miyani avarde mishavad bayad kamtar az zarfiate vasile h1 bashad
-co_14 bari ke be anbare miyani avarde mishavad bayad kamtar az zarfiate anbare miyani bashad
-co_15 ya dar tp=1 ya 2 bayad sathe dovom tey shavad
+co_10 return to the beggining 
+co_11 Remove sub tour 
+co_12 Demand control 
+co_13 Vehicle cap control 
+co_14 Cap constraint sub depot 
+co_15 
 co_16
 co_17
 co_20
@@ -156,8 +156,8 @@ obj_8(h,tp)$(ord(h)=2)  .. fix_motorh2=e=sum((s,c),bb(h)*tf2(s,c,tp)*ztt(s,c,tp)
 obj_11(h)$(ord(h)=1)    .. fix_v1=e=sum((nds,o,tp),bb(h)*2.8*v(tp)*tf1(Nds,o,tp)*x(nds,o,h));
 obj_12(h,tp)$(ord(h)=2) .. fix_v2=e=sum((s,c),bb(h)*2.1*v(tp)*tf2(s,c,tp)*y(s,c,h));
 
-************************************sathe dovom ********************************
-****chand ta mashin h2 az anbar haye miyani be moshtari service midahand *******
+************************************Second Level ********************************
+
 co_1(c,h)$(ord(h)=2)    .. sum((Nsc)$(not sameas(Nsc,c)),y(Nsc,c,h))=e=1;
 co_2(h) $(ord(h)=2)     .. sum((s,j),y(s,j,h))=e=0;
 co_3(nsc,h)$(ord(h)=2)  .. sum((i),y(Nsc,i,h))=e=sum((i),y(i,Nsc,h));
@@ -169,8 +169,8 @@ co_8 (s)                .. sum((c),dem(c)*u(s,c))=l=ca(s)*z(s);
 co_20 (s,h) $(ord(h)=2) .. sum((c),dem(c)*u(s,c))=l=sum((c),ca(s)*y(s,c,h));
 co_21(h,s)$(ord(h)=2)   .. sum((c),dem(c)*y(c,s,h))=l=b(s,'h1');
 
-************************************sathe aval**********************************
-**faghat yek mashine bozorg az anbare asli be tamame miyani ha service midahad**
+************************************First Level**********************************
+
 co_9(s,h)$(ord(h)=1)    .. sum((Nds)$(not sameas(Nds,s)),x(Nds,s,h))=e=z(s);
 co_10(Nds,h)$(ord(h)=1) .. sum((o),x(o,Nds,h))=e=sum((o),x(Nds,o,h));
 Co_11(j,g,h)$(ord(h)=1) .. R1(j,h)-R1(g,h)+card(s)*x(j,g,h)=l=card(s)-1;
@@ -179,7 +179,7 @@ co_13(h)$(ord(h)=1)     .. sum((s),b(s,h))=l=capp(h);
 co_14(s,h)$(ord(h)=1)   .. b(s,h)=l=ca(s);
 
 ***********************************Time*****************************************
-************Mahdodiata marbot be ghesmate vabastegi be zaman********************
+
 co_15(c)      ..sum((s,tp),ztt(s,c,tp))=e=1;
 co_16(s,c,tp) .. tf1('d1',s,'1')+tf2(s,c,tp)=g=lo(c);
 co_17(s,c,tp) .. tf1('d1',s,'1')+tf2(s,c,tp)=l=up(c);
