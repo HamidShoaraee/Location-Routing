@@ -1,0 +1,191 @@
+                                                               Sets
+         N  all nodes                          /d1,s1,s2,s3,s4,s5,c1,c2,c3,c4,C5/
+         k(N) main depot                      /d1/
+         S(N) subdepots                      /s1,s2,s3,s4,s5/
+         c(N) customers                     /c1,c2,c3,c4,C5/
+         Nds(n) all depots                 /d1,s1,s2,s3,s4,s5/
+         Nsc(n) sub depots and customers  /s1,s2,s3,s4,s5,c1,c2,c3,c4,C5/
+         h index of vehicle type         /h1,h2/
+         tp index of time               /1,3/
+
+;
+********************************************************************************
+alias(Nsc,i);
+alias(Nds,o);
+alias(c,t,f);
+alias(S,j,g);
+
+parameters
+Cap(k)  Cap of main depot (k)          /d1 5000000/
+Ca(S)   Cap of subdepots  (s)       /s1 120,s2 950, s3 320,s4 435, s5 1249/
+gg(s)   Fixed cost of sub depots(s)   /s1 1050,s2 490,s3 860,s4 8999, s5 1700/
+tt(h)   Fix cost of vehicles          /h1 2000,h2 50/
+capp(h) Cap of vehicle                 /h1 20000,h2 500/
+dem(c)  customer demand               /c1 46, c2 28, c3 50,c4 28,C5 61/
+v(tp)   Speed of vehicles            /1 30,3 5/
+lo(c)   lower bound  of service time  /c1 0.10,c2 0.13,c3 0.08,c4 0.11, C5 0.04/
+up(c)   upper bound service time  /c1 160,c2 149,c3 97,c4 125, C5 90/
+m(h)    weight of each vehicle  /h1 1000, h2 500/
+bb(h)   engine params          /h1 2.53, h2 2.15/
+;
+Table C1(Nds,Nds) Cost of  first echelon 
+      d1      s1    s2      s3   s4      s5
+d1    0       117   125     85   84      107
+s1    117     0     54      32   123     96
+s2    125     54    0       40   69      42
+s3    85      32    40      0    101     74
+s4    84      123   69      101   0      27
+s5    107     96    42      74    27     0
+
+;
+display c1;
+Table C2(Nsc,c) Cost of second echelon 
+        c1      c2      c3      c4       c5
+s1      35      58      15      22       26
+s2      45      50      39      41       28
+s3      13      90      31      54       54
+s4      114     85      103     137      97
+s5      87      68      81      110      70
+;
+
+
+tf1(Nds,o,tp)$(not sameas(Nds,o) and ord(tp)=1)=c1(nds,o)/v(tp);
+display tf1;
+
+tf2(nsc,c,tp)=c2(nsc,c)/v(tp);
+display tf2;
+
+time(s,c,tp)=tf1('d1',s,'1')+tf2(s,c,tp);
+display time ;
+
+de(s)=ca(s);
+scalar  a1  
+w(s,h)= a1*de(s)+ m('h1');
+parameter f1(n,s,h);
+f1(j,s,h)$(ord(h)=1) =w(s,'h1')-de(j);
+                                 f1('d1','s1','h1')=w('s1','h1');
+                                 f1('d1','s2','h1')=w('s2','h1');
+                                 f1('d1','s3','h1')=w('s3','h1');
+                                 f1('d1','s4','h1')=w('s4','h1');
+                                 f1('s1','s1','h1')=0;
+                                 f1('s2','s2','h1')=0;
+                                 f1('s3','s3','h1')=0;
+                                 f1('s4','s4','h1')=0;
+                                 f1('s5','s5','h1')=0;
+display f1;
+w(c,h)= a1*dem(c)+ m('h2');
+parameter f2(n,c,h);
+f2(nds,c,h)$(ord(h)=2)=w(c,'h2');
+f2(t,c,h)$(ord(h)=2)=w(c,'h2')-dem(t);
+
+                                 f2('d1','c1','h2')=0;
+                                 f2('d1','c2','h2')=0;
+                                 f2('d1','c3','h2')=0;
+                                 f2('d1','c4','h2')=0;
+display f2;
+
+********************************************************************************
+variable          zt      Objective function ;
+variable          R2      Aux paramter (remove sub tour );
+variable          R1      remove sub tour 
+positive variable Fix_Cs  Fixed cost of depot;
+positive variable Fix_h1  Fixed cost of h1 ;
+positive variable Fix_h2  Fixed cost of h2 ;
+positive variable Fix_Tr1 transportation cost;
+positive variable Fix_Tr2 transportation cost;
+positive variable Fix_motorh1 engine module cost h1 ;
+positive variable fix_weighh1 weight cost h1;
+positive variable fix_weighh2 weight cost h2;
+positive variable fix_motorh2 engine module cost h2;
+binary variable   z(s)        if sub depot of S selected;
+binary variable   ztt(n,n,tp) ;
+binary variable   u(s,c)  if coustome C get service from subdepot S ;
+binary variable   x(N,N,h) if vehicle h1 pass the way in A1 ;
+binary variable   y(N,N,h) if vehicle h2 pass the way in A2;
+positive variable b(s,h)   product cap that transfer;
+positive variable fix_v1     ;
+positive variable fix_v2     ;
+integer variable num(h);
+positive variable numv;
+********************************************************************************
+Equations
+obj_1 Fixed cost of S 
+obj_2 Fixed cost of  h1
+obj_3 Fixed cost of  h2
+obj_4 T1 cost 
+obj_5 T2 cost
+obj_6 T total 
+obj_7 engine cost h1
+obj_8 engine cost h2 
+*obj_9 weight cost 
+*obj_10
+obj_11
+obj_12
+co_1  All customers need to be served 
+co_2  h2 cannot pass through sub depots 
+co_3  Return to the subdepot 
+co_4  No sub tour 
+co_5  Cap limitation h2 
+co_6  Demand constaraint 
+co_7  One suplier at least 
+co_8  Cap constaraint
+co_9  Connection to first level 
+co_10 age az anbare asli dori shoro shod bayad be an bazgardim
+co_11 hazfe zir tour yani az abare asli shoro konim vali jaye dg tamom konim
+co_12 tamame bari ke ba h1 be s avarde shode bayad barabare tamame taghazai bashad ke be in anbar vasl shode
+co_13 majmoe bari ke be anbare miyani avarde mishavad bayad kamtar az zarfiate vasile h1 bashad
+co_14 bari ke be anbare miyani avarde mishavad bayad kamtar az zarfiate anbare miyani bashad
+co_15 ya dar tp=1 ya 2 bayad sathe dovom tey shavad
+co_16
+co_17
+co_20
+co_21
+;
+
+********************************************************************************
+obj_1                .. Fix_Cs=e=sum((s),gg(s)*z(s));
+obj_2(h)$(ord(h)=1)  .. Fix_h1=e=sum((Nds,k)$(not sameas(Nds,k)),tt(h)*x(nds,k,h));
+obj_3(h)$(ord(h)=2)  .. Fix_h2=e=tt(h)*num(h);
+obj_4(h)$(ord(h)=1)  .. Fix_Tr1=e=sum((Nds,o),c1(Nds,o)*x(Nds,o,h));
+obj_5(h)$(ord(h)=2)  .. Fix_Tr2=e=sum((Nsc,c),c2(Nsc,c)*y(Nsc,c,h));
+obj_6 .. zt=e=Fix_Cs+Fix_h1+Fix_h2+Fix_Tr1+Fix_Tr2+fix_motorh1+fix_motorh2+fix_v1+fix_v2 ;
+obj_7(h)$(ord(h)=1)     .. fix_motorh1=e=sum((nds,o,tp),bb(h)*tf1(Nds,o,tp)*x(nds,o,h));
+obj_8(h,tp)$(ord(h)=2)  .. fix_motorh2=e=sum((s,c),bb(h)*tf2(s,c,tp)*ztt(s,c,tp));
+*obj_9(h,n,o)$(ord(h)=1).. fix_weighh1=e=sum((nds,s),bb(h)*c1(nds,o)*f1(n,s,h)*x(nds,s,h));
+*obj_10(h,n)$(ord(h)=2) .. fix_weighh2=e=sum((nsc,c),bb(h)*c2(nsc,c)*f2(n,c,h)*y(nsc,c,h));
+obj_11(h)$(ord(h)=1)    .. fix_v1=e=sum((nds,o,tp),bb(h)*2.8*v(tp)*tf1(Nds,o,tp)*x(nds,o,h));
+obj_12(h,tp)$(ord(h)=2) .. fix_v2=e=sum((s,c),bb(h)*2.1*v(tp)*tf2(s,c,tp)*y(s,c,h));
+
+************************************sathe dovom ********************************
+****chand ta mashin h2 az anbar haye miyani be moshtari service midahand *******
+co_1(c,h)$(ord(h)=2)    .. sum((Nsc)$(not sameas(Nsc,c)),y(Nsc,c,h))=e=1;
+co_2(h) $(ord(h)=2)     .. sum((s,j),y(s,j,h))=e=0;
+co_3(nsc,h)$(ord(h)=2)  .. sum((i),y(Nsc,i,h))=e=sum((i),y(i,Nsc,h));
+co_4(h,t,f)$(ord(h)=2)  .. R2(t,h)-R2(f,h)+card(c)*y(t,f,h)=l=card(c)-1;
+co_5(h)$(ord(h)=2)      .. sum((c,Nsc)$(not sameas(Nsc,c)),dem(c)*y(Nsc,c,h))=l=num(h)*capp(h);
+co_6(h,s)$(ord(h)=2)    .. sum((c),dem(c)*y(s,c,h))=l=b(s,'h1');
+co_7(c)                 .. sum((s),u(s,c))=e=1;
+co_8 (s)                .. sum((c),dem(c)*u(s,c))=l=ca(s)*z(s);
+co_20 (s,h) $(ord(h)=2) .. sum((c),dem(c)*u(s,c))=l=sum((c),ca(s)*y(s,c,h));
+co_21(h,s)$(ord(h)=2)   .. sum((c),dem(c)*y(c,s,h))=l=b(s,'h1');
+
+************************************sathe aval**********************************
+**faghat yek mashine bozorg az anbare asli be tamame miyani ha service midahad**
+co_9(s,h)$(ord(h)=1)    .. sum((Nds)$(not sameas(Nds,s)),x(Nds,s,h))=e=z(s);
+co_10(Nds,h)$(ord(h)=1) .. sum((o),x(o,Nds,h))=e=sum((o),x(Nds,o,h));
+Co_11(j,g,h)$(ord(h)=1) .. R1(j,h)-R1(g,h)+card(s)*x(j,g,h)=l=card(s)-1;
+Co_12(s)                .. sum((h),b(s,h)$(ord(h)=1))=e=sum((c),dem(c)*u(s,c));
+co_13(h)$(ord(h)=1)     .. sum((s),b(s,h))=l=capp(h);
+co_14(s,h)$(ord(h)=1)   .. b(s,h)=l=ca(s);
+
+***********************************Time*****************************************
+************Mahdodiata marbot be ghesmate vabastegi be zaman********************
+co_15(c)      ..sum((s,tp),ztt(s,c,tp))=e=1;
+co_16(s,c,tp) .. tf1('d1',s,'1')+tf2(s,c,tp)=g=lo(c);
+co_17(s,c,tp) .. tf1('d1',s,'1')+tf2(s,c,tp)=l=up(c);
+model  hamid /all/ ;
+hamid.optcr=0;
+hamid.reslim=100;
+Option mip=cplex;
+solve  hamid using MIP Minimizing zt;
+display zt.l, x.l,y.l;
