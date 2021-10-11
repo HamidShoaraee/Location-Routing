@@ -11,78 +11,78 @@ xsmax=400;
 ysmin=200;
 ysmax=400;
 
-x=randi([xmin xmax],1,I);          %mokhtasate moshtarian
-y=randi([ymin ymax],1,I);          %mokhtasate moshtarian
+x=randi([xmin xmax],1,I);          %Customers random postions 
+y=randi([ymin ymax],1,I);          %Customoers rand postions 
 
 alpha_x=0.4;
 xm=(xsmin+xsmax)/2;                      
 dx=xsmax-xsmin;
-x0min=round(xm-alpha_x*dx);       %hade mokhtasate ehtemali anbare miyani
+x0min=round(xm-alpha_x*dx);       %upper and lower of main depot pos
 x0max=round(xm+alpha_x*dx);                       
 
 alpha_y=0.3;
 ym=(ysmin+ysmax)/2;                      
 dy=ysmax-ysmin;
-y0min=round(ym-alpha_y*dy);     %hade mokhtasate ehtemali anbare miyani
+y0min=round(ym-alpha_y*dy);     %upper and lower of sub depot pos 
 y0max=round(ym+alpha_y*dy);
 
-x0=randi([x0min x0max],1,J);    %mokhtasate anbare miyani 
+x0=randi([x0min x0max],1,J);    %sub depot position 
 y0=randi([y0min y0max],1,J);
 
-d2=zeros(I,I);                  %fasele har 2 moshtari
-d1=zeros(J,J);                  %fasele har 2 anbare miyani
-d0=zeros(1,J);                  %fasele anbare miyani az anbare asli
-d3=zeros(I,J);                  %fasele anbare miyani az moshtari
+d2=zeros(I,I);                  %Dist of two customers 
+d1=zeros(J,J);                  %Dist of two sub depots 
+d0=zeros(1,J);                  %Dist of main from  sub 
+d3=zeros(I,J);                  %Dist of sub from customoers 
 
 
 for i1=1:I
     for i2=i1+1:I
-    d2(i1,i2)=sqrt((x(i1)-x(i2))^2+(y(i1)-y(i2))^2);  %fasele har 2 moshtari        
+    d2(i1,i2)=sqrt((x(i1)-x(i2))^2+(y(i1)-y(i2))^2);  %Dist of two customers        
     d2(i2,i1)=d2(i1,i2);    
     end
 end
 
 for k1=1:J
     for k2=k1+1:J
-    d1(k1,k2)=sqrt((x0(k1)-x0(k2))^2+(y0(k1)-y0(k2))^2);  %fasele har 2 anbare miyani           
+    d1(k1,k2)=sqrt((x0(k1)-x0(k2))^2+(y0(k1)-y0(k2))^2);  %Dist of two sub depots            
     d1(k2,k1)=d1(k1,k2);  
     end
 end 
 
 for t1=1:J
     
-   d0(t1)=sqrt((x0(t1)-xd)^2+(y0(t1)-yd)^2);  %fasele anbar miyani anbare asli                       
+   d0(t1)=sqrt((x0(t1)-xd)^2+(y0(t1)-yd)^2);  %Dist of sub from main                      
 end
 
 for i=1:J
    for k=1:I
        
-   d3(i,k)=sqrt((x0(i)-x(k))^2+(y0(i)-y(k))^2);   %fasele anbare miyani az moshtarin     
+   d3(i,k)=sqrt((x0(i)-x(k))^2+(y0(i)-y(k))^2);   %Dist of sub from customers     
   % d3(i,k)=d3(k,i) ;   
    end  
 end
 
 
-rmin=150;                                %Min Taghaza Moshtarin
-rmax=400;                                %Max Taghaza Moshtarian
+rmin=150;                                %Customers demand 
+rmax=400;                                %Max customer dem
 r=randi([rmin rmax],1,I);                
 TotalDem=sum(r); 
 
 capmin=200;                             
 capmax=900; 
-cap=randi([capmin capmax],1,J);         %Zarfiate anbare miyani 
+cap=randi([capmin capmax],1,J);         %Cap  of sub depot 
 Totalcap=sum(cap);
 
 
 cmean=TotalDem/h;                           
 cmin=round(1.5*cmean);
-cmax=round(3.5*cmean);              %Zarfiate Vasile Naghliye h1 (sangin) 
+cmax=round(3.5*cmean);              %Cap of h1 vehicle 
 ch=randi([cmin cmax],1,h);
 
 
                        
 cminhh=4900;
-cmaxhh=5000;                         %Zarfiate Vasile Naghliye h2 (Sabok) 
+cmaxhh=5000;                         %Cap of h2 vehicle
 chh=randi([cminhh cmaxhh],1,hh);
 
         
@@ -109,9 +109,9 @@ end
 
 
 
-H1=sqrt((xsmax-xd)^2+(ysmax-yd)^2);   %tolani tarin fasele dar sathe 1
-T1=H1/mean(vh);                      %tolani tarin zaman dar sathe 1
-MaxTourTime1=J/h*T1;                  %tolani tarin zaman tour dar sathe 1
+H1=sqrt((xsmax-xd)^2+(ysmax-yd)^2);   %Mix distance first level 
+T1=H1/mean(vh);                      %Max time first level 
+MaxTourTime1=J/h*T1;                  %Max time first level 
 t1min=round(0*MaxTourTime1);
 t1max=round(0.4*MaxTourTime1);
 t2min=round(2.5*MaxTourTime1);
